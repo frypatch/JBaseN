@@ -1,0 +1,16 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'com.sawwit.Main'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    //test dependencies
+    testCompile 'junit:junit:4.12'
+}
