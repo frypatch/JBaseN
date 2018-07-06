@@ -5,11 +5,6 @@ import java.util.List;
 
 public class BaseN {
     private final byte[] encodingTable;
-    private int bytesNeeded=-1;
-//    Note: A packed bit length of 21 takes way longer to calculate than 18
-    private static final int PACKED_BIT_LENGTH = 21;
-//    18 is optimized for base64    
-//    private static final int PACKED_BIT_LENGTH = 18;
     
     private BaseN(byte[] encodingTable){
         this.encodingTable = encodingTable;
@@ -38,9 +33,9 @@ public class BaseN {
         bits.addAll(getBitsFromData(data));
 
         List<Byte> byteList = new ArrayList();
-        for(int i=0; i<bits.size(); i+=PACKED_BIT_LENGTH){
+        for(int i=0; i<bits.size(); i+=getPackedBitLength()){
             StringBuilder aByte = new StringBuilder();
-            for(int j=i; j<bits.size()&j-i<PACKED_BIT_LENGTH; j++){
+            for(int j=i; j<bits.size()&j-i<getPackedBitLength(); j++){
                 if(bits.get(j)){
                     aByte.append("1");
                 } else{
@@ -57,7 +52,7 @@ public class BaseN {
         List<Boolean> decodedBits = new ArrayList();
         for(Long decodedLong : getDecodedLongs(data)){
             String bits = Long.toBinaryString(decodedLong);
-            while(bits.length()<PACKED_BIT_LENGTH){
+            while(bits.length()<getPackedBitLength()){
                 bits="0"+bits;
             }
             for(int i=0; i<bits.length(); i++){
@@ -73,7 +68,7 @@ public class BaseN {
         int paddingLength = getPaddingLength(decodedBits);
         
         List<Boolean> decodedBitsWithoutPadding=new ArrayList();
-        decodedBitsWithoutPadding.addAll(decodedBits.subList(getMetaDataLength(),decodedBits.size()-PACKED_BIT_LENGTH));
+        decodedBitsWithoutPadding.addAll(decodedBits.subList(getMetaDataLength(),decodedBits.size()-getPackedBitLength()));
         decodedBitsWithoutPadding.addAll(decodedBits.subList(decodedBits.size()-paddingLength,decodedBits.size()));
         List<Byte> potentialDecodedBytes = new ArrayList();
         for(int i=0;i<decodedBitsWithoutPadding.size();i+=bitsPerByte){
@@ -99,9 +94,9 @@ public class BaseN {
         List<Boolean> bitStream = new ArrayList();
         byte metaData = 0;
         if(isData7Bits(data)){
-            metaData=(byte)((data.length*7+getMetaDataLength())%PACKED_BIT_LENGTH);
+            metaData=(byte)((data.length*7+getMetaDataLength())%getPackedBitLength());
         } else{
-            metaData=(byte)(PACKED_BIT_LENGTH+(data.length*8+getMetaDataLength())%PACKED_BIT_LENGTH);
+            metaData=(byte)(getPackedBitLength()+(data.length*8+getMetaDataLength())%getPackedBitLength());
         }
         String bits = Long.toBinaryString(metaData);
         while(bits.length()<getMetaDataLength()){
@@ -211,7 +206,7 @@ public class BaseN {
                 metaDataBits.append("0");
             }
         }
-        return Long.parseLong(metaDataBits.toString(),2)<PACKED_BIT_LENGTH;
+        return Long.parseLong(metaDataBits.toString(),2)<getPackedBitLength();
     }
     
     private boolean isData7Bits(byte[] data){
@@ -234,10 +229,10 @@ public class BaseN {
             }
         }
         int i = Integer.parseInt(metaDataBits.toString(),2);
-        if(i<PACKED_BIT_LENGTH+1){
+        if(i<getPackedBitLength()+1){
             return i;
         } else{
-            return i-PACKED_BIT_LENGTH;
+            return i-getPackedBitLength();
         }
     }
     
@@ -266,16 +261,17 @@ public class BaseN {
     }
     
     private int getMetaDataLength(){
-        return Integer.toBinaryString(PACKED_BIT_LENGTH*2).length();
+        return Integer.toBinaryString(getPackedBitLength()*2).length();
     }
     
     private int getBase(){
         return getEncodingTable().length-1;
     }
     
-    private Integer getBytesNeeded(){
+    private int bytesNeeded=-1;
+    private int getBytesNeeded(){
         if(bytesNeeded==-1){
-            double viability = Math.pow(2, PACKED_BIT_LENGTH)-1;
+            double viability = Math.pow(2, getPackedBitLength())-1;
             int count = 1;
             while((Math.pow(getBase(), count)-1)*2<viability){
                 count++;
@@ -283,6 +279,17 @@ public class BaseN {
             bytesNeeded = count;
         }
         return bytesNeeded;
+    }
+
+    private int packedBitLength=-1;
+    private int getPackedBitLength(){
+        if(packedBitLength==-1){
+            double maximumEncodingPosibilities = Math.pow(encodingTable.length,3)-1;
+            while(Math.pow(2, packedBitLength)<maximumEncodingPosibilities){
+                packedBitLength++;
+            }
+        }
+        return packedBitLength;
     }
     
     private byte[] getByteArray(List<Byte> byteList){
