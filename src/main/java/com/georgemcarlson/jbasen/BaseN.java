@@ -4,10 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BaseN {
+    private static final int BYTES_NEEDED=4;
     private final byte[] encodingTable;
+    private final int base;
+    private final int packedBitLength;
     
     private BaseN(byte[] encodingTable){
         this.encodingTable = encodingTable;
+        this.base = encodingTable.length-1;
+        this.packedBitLength = (int)((Math.log(Math.pow(encodingTable.length-1,BYTES_NEEDED-1))/Math.log(2))+1);
     }
     
     /**
@@ -114,7 +119,7 @@ public class BaseN {
     
     private List<Byte> getEncodedLong(long number){
         List<Integer> count = new ArrayList();
-        while(count.size()<getBytesNeeded()+1){
+        while(count.size()<BYTES_NEEDED+1){
             count.add(0);
         }
         for(int i=0; i<number; i++){
@@ -130,7 +135,7 @@ public class BaseN {
             }
         }
         List<Byte> byteList = new ArrayList();
-        for(int i=0; i<getBytesNeeded(); i++){
+        for(int i=0; i<BYTES_NEEDED; i++){
             byteList.add(getEncodingTable()[count.get(i)]);
         }
         if(count.get(count.size()-1)>0){
@@ -146,7 +151,7 @@ public class BaseN {
         List<Byte> potentialData = new ArrayList();
         while(i<data.length){
             potentialData.add(data[i]);
-            if(potentialData.size()==getBytesNeeded()){
+            if(potentialData.size()==BYTES_NEEDED){
                 if(i+1<data.length&&data[i+1]==getOverflowCharacterByte()){
                     potentialData.add(getOverflowCharacterByte());
                     i++;
@@ -161,7 +166,7 @@ public class BaseN {
     
     private long getDecodedLong(List<Byte> data){
         List<Integer> count = new ArrayList();
-        while(count.size()<getBytesNeeded()+1){
+        while(count.size()<BYTES_NEEDED+1){
             count.add(0);
         }
         for(int i=0; i<data.size(); i++){
@@ -264,39 +269,19 @@ public class BaseN {
         return Integer.toBinaryString(getPackedBitLength()*2).length();
     }
     
-    private int getBase(){
-        return getEncodingTable().length-1;
-    }
-    
-    private int bytesNeeded=-1;
-    private int getBytesNeeded(){
-        if(bytesNeeded==-1){
-            double viability = Math.pow(2, getPackedBitLength())-1;
-            int count = 1;
-            while((Math.pow(getBase(), count)-1)*2<viability){
-                count++;
-            }
-            bytesNeeded = count;
-        }
-        return bytesNeeded;
-    }
-
-    private int packedBitLength=-1;
-    private int getPackedBitLength(){
-        if(packedBitLength==-1){
-            double maximumEncodingPosibilities = Math.pow(encodingTable.length,3)-1;
-            while(Math.pow(2, packedBitLength)<maximumEncodingPosibilities){
-                packedBitLength++;
-            }
-        }
-        return packedBitLength;
-    }
-    
     private byte[] getByteArray(List<Byte> byteList){
         byte[] bytes = new byte[byteList.size()];
         for(int i=0; i<byteList.size(); i++){
             bytes[i]=byteList.get(i);
         }
         return bytes;
+    }
+
+    public int getPackedBitLength() {
+        return packedBitLength;
+    }
+    
+    private int getBase(){
+        return base;
     }
 }
