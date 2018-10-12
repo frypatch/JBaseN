@@ -2,7 +2,7 @@
 A Java labrary to encode arbitrary data into a set of 3 to 128 bytes of arbitrary data
 
 ## Importing Dependency
-You can import JBaseN into any gradle project by adding `maven { url 'https://jitpack.io' }` to your build.gradle repositories and `implementation 'com.github.geo-gs:JBaseN:0.0.1'` to your dependencies.
+You can import JBaseN into any gradle project by adding `maven { url 'https://jitpack.io' }` to your build.gradle repositories and `implementation 'com.github.geo-gs:JBaseN:0.0.1'` to your build.gradle dependencies.
 
 Example:
 ```
