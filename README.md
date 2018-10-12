@@ -22,8 +22,8 @@ Define an encoding table byte[] to use. Then create an instance of BaseN with th
 Base56 Example:
 ```
 public class Base56 {
-    private static final byte[] ENCODING_TABLE = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789".getBytes();
     private static final String UTF8 = "UTF-8";
+    private static final byte[] ENCODING_TABLE = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789".getBytes(UTF8);
 
     public static String encode(String data) throws Exception {
         byte[] rawData = data.getBytes(UTF8);
