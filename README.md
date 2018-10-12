@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.geo-gs:sawwit-integration:0.1.4'
+    implementation 'com.github.geo-gs:JBaseN:0.0.1'
 }
 ```
 
