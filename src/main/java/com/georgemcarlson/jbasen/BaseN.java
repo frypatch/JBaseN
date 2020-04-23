@@ -71,10 +71,13 @@ public class BaseN {
         
         int bitsPerByte = isData7Bits(decodedBits)?7:8;
         int paddingLength = getPaddingLength(decodedBits);
-        
         List<Boolean> decodedBitsWithoutPadding=new ArrayList();
-        decodedBitsWithoutPadding.addAll(decodedBits.subList(getMetaDataLength(),decodedBits.size()-getPackedBitLength()));
-        decodedBitsWithoutPadding.addAll(decodedBits.subList(decodedBits.size()-paddingLength,decodedBits.size()));
+        if (decodedBits.size() > getPackedBitLength()) {
+            decodedBitsWithoutPadding.addAll(decodedBits.subList(getMetaDataLength(), decodedBits.size() - getPackedBitLength()));
+            decodedBitsWithoutPadding.addAll(decodedBits.subList(decodedBits.size() - paddingLength, decodedBits.size()));
+        } else {
+            decodedBitsWithoutPadding.addAll(decodedBits.subList(decodedBits.size() - bitsPerByte, decodedBits.size()));
+        }
         List<Byte> potentialDecodedBytes = new ArrayList();
         for(int i=0;i<decodedBitsWithoutPadding.size();i+=bitsPerByte){
             StringBuilder aByte = new StringBuilder();
@@ -203,12 +206,23 @@ public class BaseN {
     
     private boolean isData7Bits(List<Boolean> decodedBits){
         StringBuilder metaDataBits = new StringBuilder();
-        for(int i=0; i<getMetaDataLength(); i++){
-            if(decodedBits.get(i)){
-                metaDataBits.append("1");
-        
-            } else{
-                metaDataBits.append("0");
+        if (decodedBits.size() == getPackedBitLength()) {
+            for (int i = (decodedBits.size() - getMetaDataLength() - 8); i < (decodedBits.size() - getMetaDataLength()); i++) {
+                if (decodedBits.get(i)) {
+                    metaDataBits.append("1");
+
+                } else {
+                    metaDataBits.append("0");
+                }
+            }
+        } else {
+            for (int i = 0; i < getMetaDataLength(); i++) {
+                if (decodedBits.get(i)) {
+                    metaDataBits.append("1");
+
+                } else {
+                    metaDataBits.append("0");
+                }
             }
         }
         return Long.parseLong(metaDataBits.toString(),2)<getPackedBitLength();
