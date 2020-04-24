@@ -206,8 +206,10 @@ public class BaseN {
     
     private boolean isData7Bits(List<Boolean> decodedBits){
         StringBuilder metaDataBits = new StringBuilder();
-        if (decodedBits.size() == getPackedBitLength()) {
-            for (int i = (decodedBits.size() - getMetaDataLength() - 8); i < (decodedBits.size() - getMetaDataLength()); i++) {
+        if (getMetaDataLength() + 8 > decodedBits.size()) {
+            return true;
+        } else if (decodedBits.size() == getPackedBitLength()) {
+            for (int i = (decodedBits.size() - getMetaDataLength() - 8); i < (decodedBits.size() - 8); i++) {
                 if (decodedBits.get(i)) {
                     metaDataBits.append("1");
 

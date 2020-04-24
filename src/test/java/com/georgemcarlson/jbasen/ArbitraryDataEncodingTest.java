@@ -46,7 +46,7 @@ public class ArbitraryDataEncodingTest {
       potentialDictionary[i] = (byte) (i - 20);
     }
 
-    for (int i = 33; i < 34; i++) {
+    for (int i = 3; i < potentialDictionary.length; i++) {
       byte[] dictionary = Arrays.copyOfRange(potentialDictionary, 0, i);
       byte[] encodedData = BaseN.getInstance(dictionary).encode(message.getBytes());
       byte[] decodedData = BaseN.getInstance(dictionary).decode(encodedData);
